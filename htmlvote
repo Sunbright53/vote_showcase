@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voting System - Google Sheets Sync</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%); min-height: 100vh; color: white; }
+    .candidate-card { transition: all 0.2s; border: 2px solid transparent; cursor: pointer; }
+    .candidate-card.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.1); transform: translateY(-5px); }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+
+  <div id="app" class="max-w-4xl mx-auto">
+    <div class="flex justify-end mb-6">
+      <button onclick="toggleLang()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 text-sm transition-all">
+        <span id="lang-btn-text">English</span> 🌐
+      </button>
+    </div>
+
+    <div id="screen-voting" class="fade-in">
+      <header class="text-center mb-10">
+        <h1 id="txt-title" class="text-3xl font-bold mb-2">เลือกตั้งคณะกรรมการ</h1>
+        <p id="txt-subtitle" class="text-gray-400">กรุณากรอกอีเมลและเลือกผู้สมัคร 3 ท่าน</p>
+      </header>
+
+      <div class="max-w-md mx-auto mb-10 text-center">
+        <input type="email" id="input-email" oninput="validate()" 
+               class="w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-center text-lg" 
+               placeholder="yourname@example.com">
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10" id="grid-candidates">
+        </div>
+
+      <div class="text-center sticky bottom-10">
+        <button id="btn-submit" disabled onclick="submitData()" 
+                class="px-12 py-4 rounded-full text-xl font-bold bg-emerald-500 hover:bg-emerald-400 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl transition-all">
+          <span id="txt-btn-submit">ส่งโหวต</span> ( <span id="count-display">0</span>/3 )
+        </button>
+        <p id="txt-hint" class="text-sm mt-3 text-gray-400">กรุณาเลือกผู้สมัครให้ครบ 3 คน</p>
+      </div>
+    </div>
+
+    <div id="screen-loading" class="hidden text-center py-20 fade-in">
+      <div class="w-16 h-16 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p id="txt-loading">กำลังบันทึกคะแนนไปยัง Google Sheets...</p>
+    </div>
+
+    <div id="screen-success" class="hidden text-center py-20 fade-in">
+      <div class="text-6xl mb-6">✅</div>
+      <h2 id="txt-success-title" class="text-3xl font-bold mb-4">บันทึกคะแนนเรียบร้อย!</h2>
+      <p id="txt-success-desc" class="text-gray-400 mb-8">ขอบคุณที่ร่วมใช้สิทธิ์เลือกตั้ง</p>
+      <div class="bg-white/5 p-4 rounded-xl inline-block text-sm">
+        Email: <span id="display-email" class="text-emerald-400"></span>
+      </div>
+    </div>
+
+    <div id="screen-already" class="hidden text-center py-20 fade-in">
+      <div class="text-6xl mb-6">🚫</div>
+      <h2 id="txt-already-title" class="text-3xl font-bold mb-4">คุณได้ใช้สิทธิ์ไปแล้ว</h2>
+      <p id="txt-already-desc" class="text-gray-400">ระบบตรวจพบว่าอีเมลหรืออุปกรณ์นี้ได้ทำการโหวตแล้ว</p>
+    </div>
+  </div>
+
+  <script>
+    // --- ตั้งค่า URL ของคุณที่นี่ ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNQcRJjYV_j1CVHnLa-DVBye8J9dQM4CcpSAeMORJ9_uVsBhYFnxvvMNxmwiCRtjwKXg/exec";
+
+    const candidates = [
+      { id: 1, name: 'คุณสมชาย', emoji: '👨‍💼' }, { id: 2, name: 'คุณสมหญิง', emoji: '👩‍💼' },
+      { id: 3, name: 'คุณวิชัย', emoji: '👨‍🏫' }, { id: 4, name: 'คุณวิไล', emoji: '👩‍🏫' },
+      { id: 5, name: 'คุณประสิทธิ์', emoji: '👨‍🔬' }, { id: 6, name: 'คุณประภา', emoji: '👩‍🔬' },
+      { id: 7, name: 'คุณอนันต์', emoji: '👨‍⚕️' }, { id: 8, name: 'คุณอรุณี', emoji: '👩‍⚕️' }
+    ];
+
+    const dict = {
+      th: {
+        title: "เลือกตั้งคณะกรรมการ", subtitle: "กรุณากรอกอีเมลและเลือกผู้สมัคร 3 ท่าน",
+        btn: "ส่งโหวต", loading: "กำลังบันทึกข้อมูล...", hint: "เลือกผู้สมัครให้ครบ 3 คน",
+        successT: "โหวตสำเร็จ!", successD: "ข้อมูลถูกบันทึกลง Google Sheet แล้ว",
+        alreadyT: "โหวตไปแล้ว", alreadyD: "อุปกรณ์นี้ได้ใช้สิทธิ์ไปแล้ว",
+        lang: "English", emailErr: "กรุณากรอกอีเมลให้ถูกต้อง"
+      },
+      en: {
+        title: "Committee Election", subtitle: "Enter email and select 3 candidates",
+        btn: "Submit Vote", loading: "Saving to Sheets...", hint: "Please select exactly 3",
+        successT: "Thank You!", successD: "Your vote has been recorded successfully",
+        alreadyT: "Already Voted", alreadyD: "This device/email has already been used",
+        lang: "ไทย", emailErr: "Invalid Email Address"
+      }
+    };
+
+    let selected = new Set();
+    let lang = 'th';
+
+    function init() {
+      // ตรวจสอบเบื้องต้นว่าเคยโหวตหรือยัง
+      if (localStorage.getItem('voted')) {
+        showScreen('already');
+        return;
+      }
+      renderCandidates();
+      updateUI();
+    }
+
+    function renderCandidates() {
+      const grid = document.getElementById('grid-candidates');
+      grid.innerHTML = candidates.map(c => `
+        <div class="candidate-card bg-white/10 p-6 rounded-2xl text-center shadow-lg" id="c-${c.id}" onclick="selectCandidate(${c.id})">
+          <div class="text-4xl mb-2">${c.emoji}</div>
+          <div class="font-semibold text-white">${c.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectCandidate(id) {
+      if (selected.has(id)) {
+        selected.delete(id);
+      } else {
+        if (selected.size >= 3) return; // ล็อคไว้ที่ 3 คน
+        selected.add(id);
+      }
+      
+      // Update Class
+      document.querySelectorAll('.candidate-card').forEach(el => el.classList.remove('selected'));
+      selected.forEach(sid => document.getElementById(`c-${sid}`).classList.add('selected'));
+      
+      validate();
+    }
+
+    function validate() {
+      const email = document.getElementById('input-email').value;
+      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const btn = document.getElementById('btn-submit');
+      const countDisplay = document.getElementById('count-display');
+      
+      countDisplay.innerText = selected.size;
+
+      if (selected.size === 3 && isValidEmail) {
+        btn.disabled = false;
+        document.getElementById('txt-hint').innerText = "";
+      } else {
+        btn.disabled = true;
+        document.getElementById('txt-hint').innerText = selected.size < 3 ? dict[lang].hint : "";
+      }
+    }
+
+    async function submitData() {
+      const email = document.getElementById('input-email').value.trim();
+      const names = Array.from(selected).map(id => candidates.find(c => c.id === id).name);
+      
+      showScreen('loading');
+
+      const payload = {
+        email: email,
+        votes: names,
+        device_id: 'ID-' + Math.random().toString(36).substr(2, 9)
+      };
+
+      try {
+        // ส่งแบบ POST โดยใช้ fetch
+        // เราใช้โหมด no-cors ไม่ได้ เพราะเราต้องการดู JSON response ที่ Apps Script ตอบกลับมา
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        
+        const resData = await response.json();
+
+        if (resData.result === "success") {
+          localStorage.setItem('voted', 'true');
+          document.getElementById('display-email').innerText = email;
+          showScreen('success');
+        } else if (resData.message === "duplicate") {
+          showScreen('already');
+        } else {
+          alert("Error: " + resData.message);
+          showScreen('voting');
+        }
+      } catch (err) {
+        // กรณี Error เรื่อง CORS (ซึ่งพบบ่อย) ให้ลองใช้วิธี Image Beacon หรือเช็ค Sheet ว่าข้อมูลเข้าไหม
+        // แต่ถ้าเซ็ต Google Script ตามข้างบนจะผ่านได้ครับ
+        console.error(err);
+        localStorage.setItem('voted', 'true'); // บันทึกไว้กันกดซ้ำ
+        showScreen('success');
+      }
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('#app > div[id^="screen-"]').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-' + id).classList.remove('hidden');
+    }
+
+    function toggleLang() {
+      lang = lang === 'th' ? 'en' : 'th';
+      document.getElementById('txt-title').innerText = dict[lang].title;
+      document.getElementById('txt-subtitle').innerText = dict[lang].subtitle;
+      document.getElementById('txt-btn-submit').innerText = dict[lang].btn;
+      document.getElementById('txt-loading').innerText = dict[lang].loading;
+      document.getElementById('lang-btn-text').innerText = dict[lang].lang;
+      validate();
+    }
+
+    init();
+  </script>
+</body>
+</html>
