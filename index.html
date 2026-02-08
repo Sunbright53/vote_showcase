@@ -35,7 +35,7 @@
                placeholder="yourname@example.com">
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10" id="grid-candidates">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-10" id="grid-candidates">
         </div>
 
       <div class="text-center sticky bottom-10">
@@ -73,22 +73,52 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNQcRJjYV_j1CVHnLa-DVBye8J9dQM4CcpSAeMORJ9_uVsBhYFnxvvMNxmwiCRtjwKXg/exec";
 
     const candidates = [
-      { id: 1, name: 'คุณสมชาย', emoji: '👨‍💼' }, { id: 2, name: 'คุณสมหญิง', emoji: '👩‍💼' },
-      { id: 3, name: 'คุณวิชัย', emoji: '👨‍🏫' }, { id: 4, name: 'คุณวิไล', emoji: '👩‍🏫' },
-      { id: 5, name: 'คุณประสิทธิ์', emoji: '👨‍🔬' }, { id: 6, name: 'คุณประภา', emoji: '👩‍🔬' },
-      { id: 7, name: 'คุณอนันต์', emoji: '👨‍⚕️' }, { id: 8, name: 'คุณอรุณี', emoji: '👩‍⚕️' }
+    { id: 1, name: 'Neo (Touchphoom Anantakarn)'},
+    { id: 2, name: 'Meg (Mira Hsu)'},
+    { id: 3, name: 'Kin (Pakin Hsu)'},
+    { id: 4, name: 'Marvin (Apipoom Hanjawanich)'},
+    { id: 5, name: 'Pete (PITCHAYUT KRUECHOTEKUL)'},
+    { id: 6, name: 'JulJul (Saranyapong Kanchanapangka)'},
+    { id: 7, name: 'Etienne (Tiberghien)'},
+    { id: 8, name: 'Aiden (Kritchanon Sivasri)'},
+    { id: 9, name: 'Tyler (Tyler Saebae)'},
+    { id: 10, name: 'Nine (Paratham Jameeken)'},
+    { id: 11, name: 'Nuermek (Nuermek Teeraakararat)'},
+    { id: 12, name: 'Preme2 (Premephaphan Ittipunsiri)'},
+    { id: 13, name: 'Gin (Sasawat Lertsamart)'},
+    { id: 14, name: 'Famous (Yannavut Sridawong)'},
+    { id: 15, name: 'Tonmai (Nathakorn Somsanguan)'},
+    { id: 16, name: 'Matang (Tanawat Tangsupwattana)'},
+    { id: 17, name: 'Pingping (Narathorn Janvipast)'},
+    { id: 18, name: 'Kenta (Wuttipat Tubsarn)'},
+    { id: 19, name: 'Temim (Phuchanut Saengrayub)'},
+    { id: 20, name: 'Takky (Tatchakorn Sattawongsakul)'},
+    { id: 21, name: 'Tigger (Totchakorn Sattawongsakul)'},
+    { id: 22, name: 'L (Allen) (Allen Jarnyaharn)'},
+    { id: 23, name: 'Parm (Thaiket Laoprapassakul) Prompt (Prompatchara Nitiraksa)'},
+    { id: 24, name: 'Ren (Tarit Janjaemjaroon)'},
+    { id: 25, name: 'Miranda (Miranda Chen)'},
+    { id: 26, name: 'Gus (Akaradej Imarom)'},
+    { id: 27, name: 'Eton (Chavin Rattanasophon)'},
+    { id: 28, name: 'Winwin (Thanaphat ketthanasitthi)'},
+    { id: 29, name: 'Ran (Paramita Chatthong) Ray (Poonchida Chatthong)'},
+    { id: 30, name: 'Rak (Weeralak saelim)'},
+    { id: 31, name: 'Captain (Suttidol Songsripipat)'},
+    { id: 32, name: 'Khonkwan (Benjanut Srisuk)'},
+    { id: 33, name: 'liangliang (Warinthon Limsathiranun)'},
+    { id: 34, name: 'Thun (Thun Iamthongthong)'}
     ];
 
     const dict = {
       th: {
-        title: "เลือกตั้งคณะกรรมการ", subtitle: "กรุณากรอกอีเมลและเลือกผู้สมัคร 3 ท่าน",
+        title: "เลือกการนำเสนอที่คุณชอบ", subtitle: "กรุณากรอกอีเมลและเลือกผู้นำเสนอ 3 ท่าน",
         btn: "ส่งโหวต", loading: "กำลังบันทึกข้อมูล...", hint: "เลือกผู้สมัครให้ครบ 3 คน",
         successT: "โหวตสำเร็จ!", successD: "ข้อมูลถูกบันทึกลง Google Sheet แล้ว",
         alreadyT: "โหวตไปแล้ว", alreadyD: "อุปกรณ์นี้ได้ใช้สิทธิ์ไปแล้ว",
         lang: "English", emailErr: "กรุณากรอกอีเมลให้ถูกต้อง"
       },
       en: {
-        title: "Committee Election", subtitle: "Enter email and select 3 candidates",
+        title: "Choose your preferred presentation.", subtitle: "Please enter your email address and select 3 presenters.",
         btn: "Submit Vote", loading: "Saving to Sheets...", hint: "Please select exactly 3",
         successT: "Thank You!", successD: "Your vote has been recorded successfully",
         alreadyT: "Already Voted", alreadyD: "This device/email has already been used",
@@ -109,15 +139,19 @@
       updateUI();
     }
 
-    function renderCandidates() {
-      const grid = document.getElementById('grid-candidates');
-      grid.innerHTML = candidates.map(c => `
-        <div class="candidate-card bg-white/10 p-6 rounded-2xl text-center shadow-lg" id="c-${c.id}" onclick="selectCandidate(${c.id})">
-          <div class="text-4xl mb-2">${c.emoji}</div>
-          <div class="font-semibold text-white">${c.name}</div>
+   function renderCandidates() {
+    const grid = document.getElementById('grid-candidates');
+    grid.innerHTML = candidates.map(c => {
+      // แยกบรรทัดชื่อเล่นกับชื่อจริง
+      const displayName = c.name.replace(/\) /g, ')<br>'); 
+
+      return `
+        <div class="candidate-card bg-white/10 p-4 rounded-xl text-center shadow-md flex items-center justify-center min-h-[80px]" id="c-${c.id}" onclick="selectCandidate(${c.id})">
+          <div class="font-semibold text-white leading-tight text-base">${displayName}</div>
         </div>
-      `).join('');
-    }
+      `;
+    }).join('');
+  }
 
     function selectCandidate(id) {
       if (selected.has(id)) {
