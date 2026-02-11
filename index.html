@@ -3,245 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voting System - Google Sheets Sync</title>
+  <title>Coder Showcase 2026 - Voting System</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%); min-height: 100vh; color: white; }
-    .candidate-card { transition: all 0.2s; border: 2px solid transparent; cursor: pointer; }
-    .candidate-card.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.1); transform: translateY(-5px); }
-    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    body { font-family: 'Prompt', sans-serif; background: #f4f7fb; color: #1e293b; }
+    .candidate-card { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border: 2px solid white; cursor: pointer; background: white; }
+    .candidate-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .candidate-card.selected { border-color: #3b82f6; background: #eff6ff; }
+    .group-section { background: rgba(255, 255, 255, 0.6); border-radius: 2rem; padding: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 2rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-waiting { background: #cbd5e1; }
+    .dot-done { background: #10b981; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .sticky-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; z-index: 50; padding: 1rem; }
   </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="pb-32">
 
-  <div id="app" class="max-w-4xl mx-auto">
-    <div class="flex justify-end mb-6">
-      <button onclick="toggleLang()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 text-sm transition-all">
-        <span id="lang-btn-text">English</span> 🌐
-      </button>
-    </div>
+  <div id="app" class="max-w-5xl mx-auto px-4 pt-10">
+    <header class="text-center mb-12">
+      <div class="inline-block px-4 py-1 mb-4 rounded-full bg-blue-100 text-blue-600 text-xs font-bold tracking-widest uppercase">
+        Project Showcase 15 Feb 2026
+      </div>
+      <h1 class="text-4xl font-bold text-slate-800 mb-4">เลือกผลงานที่คุณชื่นชอบ</h1>
+      <p class="text-slate-500 text-lg">กติกา: โปรดเลือกนักพัฒนาที่คุณประทับใจ **กลุ่มละ 2 ท่าน**</p>
+    </header>
 
-    <div id="screen-voting" class="fade-in">
-      <header class="text-center mb-10">
-        <h1 id="txt-title" class="text-3xl font-bold mb-2">เลือกการนำเสนอที่คุณชอบ</h1>
-        <p id="txt-subtitle" class="text-gray-400">กรุณาเลือกผู้สมัครให้ครบ 3 คน</p>
-      </header>
-
-      <div class="max-w-md mx-auto mb-10 text-center">
+    <div class="max-w-md mx-auto mb-16">
+      <div class="bg-white p-2 rounded-3xl shadow-sm border border-slate-200">
         <input type="email" id="input-email" oninput="validate()" 
-               class="w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-center text-lg" 
-               placeholder="yourname@example.com">
+               class="w-full px-6 py-4 rounded-2xl focus:outline-none text-center text-lg" 
+               placeholder="ใส่อีเมลของคุณเพื่อเริ่มโหวต">
       </div>
+    </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-10" id="grid-candidates">
+    <div id="screen-voting" class="space-y-8">
+      <section class="group-section">
+        <div class="flex items-center justify-between mb-6 px-2">
+          <h2 class="text-2xl font-bold text-blue-600">กลุ่ม Genius (5-7 ปี)</h2>
+          <span id="badge-Genius" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
         </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Genius"></div>
+      </section>
 
-      <div class="text-center sticky bottom-10">
-        <button id="btn-submit" disabled onclick="submitData()" 
-                class="px-12 py-4 rounded-full text-xl font-bold bg-emerald-500 hover:bg-emerald-400 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl transition-all">
-          <span id="txt-btn-submit">ส่งโหวต</span> ( <span id="count-display">0</span>/3 )
-        </button>
-        <p id="txt-hint" class="text-sm mt-3 text-gray-400">กรุณาเลือกผู้สมัครให้ครบ 3 คน</p>
+      <section class="group-section">
+        <div class="flex items-center justify-between mb-6 px-2">
+          <h2 class="text-2xl font-bold text-purple-600">กลุ่ม Wizard (8-10 ปี)</h2>
+          <span id="badge-Wizard" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Wizard"></div>
+      </section>
+
+      <section class="group-section">
+        <div class="flex items-center justify-between mb-6 px-2">
+          <h2 class="text-2xl font-bold text-emerald-600">กลุ่ม Hero (11-14 ปี)</h2>
+          <span id="badge-Hero" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Hero"></div>
+      </section>
+    </div>
+
+    <div id="screen-loading" class="hidden text-center py-24"><div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div><p>กำลังบันทึกคะแนนโหวต...</p></div>
+    <div id="screen-success" class="hidden text-center py-24"><h2 class="text-4xl font-bold text-green-600 mb-4">โหวตสำเร็จ!</h2><p class="text-slate-500 text-xl">ขอบคุณที่ร่วมเป็นแรงใจให้เด็กๆ ครับ</p></div>
+  </div>
+
+  <div class="sticky-bar shadow-2xl">
+    <div class="max-w-md mx-auto">
+      <div class="flex justify-center gap-4 mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <span id="ind-Genius"><span class="status-dot dot-waiting"></span>Genius</span>
+        <span id="ind-Wizard"><span class="status-dot dot-waiting"></span>Wizard</span>
+        <span id="ind-Hero"><span class="status-dot dot-waiting"></span>Hero</span>
       </div>
-    </div>
-
-    <div id="screen-loading" class="hidden text-center py-20 fade-in">
-      <div class="w-16 h-16 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p id="txt-loading">กำลังบันทึกคะแนนไปยัง Google Sheets...</p>
-    </div>
-
-    <div id="screen-success" class="hidden text-center py-20 fade-in">
-      <div class="text-6xl mb-6">✅</div>
-      <h2 id="txt-success-title" class="text-3xl font-bold mb-4">บันทึกคะแนนเรียบร้อย!</h2>
-      <p id="txt-success-desc" class="text-gray-400 mb-8">ขอบคุณที่ร่วมใช้สิทธิ์</p>
-      <div class="bg-white/5 p-4 rounded-xl inline-block text-sm">
-        Email: <span id="display-email" class="text-emerald-400"></span>
-      </div>
-    </div>
-
-    <div id="screen-already" class="hidden text-center py-20 fade-in">
-      <div class="text-6xl mb-6">🚫</div>
-      <h2 id="txt-already-title" class="text-3xl font-bold mb-4">คุณได้ใช้สิทธิ์ไปแล้ว</h2>
-      <p id="txt-already-desc" class="text-gray-400">ระบบตรวจพบว่าอีเมลหรืออุปกรณ์นี้ได้ทำการโหวตแล้ว</p>
+      <button id="btn-submit" disabled onclick="submitData()" 
+              class="w-full py-4 rounded-2xl font-bold text-xl transition-all shadow-lg bg-blue-600 text-white disabled:bg-slate-200 disabled:text-slate-400">
+        ยืนยันการโหวตทั้งหมด
+      </button>
     </div>
   </div>
 
   <script>
-    // --- ตั้งค่า URL ของคุณที่นี่ ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNQcRJjYV_j1CVHnLa-DVBye8J9dQM4CcpSAeMORJ9_uVsBhYFnxvvMNxmwiCRtjwKXg/exec";
 
+    // ข้อมูลอัปเดตล่าสุดจากไฟล์ CSV
     const candidates = [
-    { id: 1, name: 'Neo (Touchphoom Anantakarn)'},
-    { id: 2, name: 'Meg (Mira Hsu)'},
-    { id: 3, name: 'Kin (Pakin Hsu)'},
-    { id: 4, name: 'Marvin (Apipoom Hanjawanich)'},
-    { id: 5, name: 'Pete (PITCHAYUT KRUECHOTEKUL)'},
-    { id: 6, name: 'JulJul (Saranyapong Kanchanapangka)'},
-    { id: 7, name: 'Etienne (Tiberghien)'},
-    { id: 8, name: 'Aiden (Kritchanon Sivasri)'},
-    { id: 9, name: 'Tyler (Tyler Saebae)'},
-    { id: 10, name: 'Nine (Paratham Jameeken)'},
-    { id: 11, name: 'Nuermek (Nuermek Teeraakararat)'},
-    { id: 12, name: 'Preme2 (Premephaphan Ittipunsiri)'},
-    { id: 13, name: 'Gin (Sasawat Lertsamart)'},
-    { id: 14, name: 'Famous (Yannavut Sridawong)'},
-    { id: 15, name: 'Tonmai (Nathakorn Somsanguan)'},
-    { id: 16, name: 'Matang (Tanawat Tangsupwattana)'},
-    { id: 17, name: 'Pingping (Narathorn Janvipast)'},
-    { id: 18, name: 'Kenta (Wuttipat Tubsarn)'},
-    { id: 19, name: 'Temim (Phuchanut Saengrayub)'},
-    { id: 20, name: 'Takky (Tatchakorn Sattawongsakul)'},
-    { id: 21, name: 'Tigger (Totchakorn Sattawongsakul)'},
-    { id: 22, name: 'L (Allen) (Allen Jarnyaharn)'},
-    { id: 23, name: 'Parm (Thaiket Laoprapassakul) Prompt (Prompatchara Nitiraksa)'},
-    { id: 24, name: 'Ren (Tarit Janjaemjaroon)'},
-    { id: 25, name: 'Miranda (Miranda Chen)'},
-    { id: 26, name: 'Gus (Akaradej Imarom)'},
-    { id: 27, name: 'Eton (Chavin Rattanasophon)'},
-    { id: 28, name: 'Winwin (Thanaphat ketthanasitthi)'},
-    { id: 29, name: 'Ran (Paramita Chatthong) Ray (Poonchida Chatthong)'},
-    { id: 30, name: 'Rak (Weeralak saelim)'},
-    { id: 31, name: 'Captain (Suttidol Songsripipat)'},
-    { id: 32, name: 'Khonkwan (Benjanut Srisuk)'},
-    { id: 33, name: 'liangliang (Warinthon Limsathiranun)'},
-    { id: 34, name: 'Thun (Thun Iamthongthong)'}
+      { "id": 1, "name": "Neo (Touchphoom Anantakarn)", "group": "Hero", "project": "Dive: An Underwater Adventure" },
+      { "id": 2, "name": "Meg (Mira Hsu)", "group": "Hero", "project": "Project" },
+      { "id": 3, "name": "Kin (Pakin Hsu)", "group": "Wizard", "project": "Project" },
+      { "id": 4, "name": "Marvin (Apipoom Hanjawanich)", "group": "Wizard", "project": "Survival Underwater in Ohio" },
+      { "id": 5, "name": "Pete (PITCHAYUT KRUECHOTEKUL)", "group": "Wizard", "project": "Ocean Guardian" },
+      { "id": 6, "name": "JulJul (Saranyapong Kanchanapangka)", "group": "Wizard", "project": "Exploring the deep ocean" },
+      { "id": 7, "name": "Etienne (Tiberghien)", "group": "Wizard", "project": "The blox water" },
+      { "id": 8, "name": "Aiden (Kritchanon Sivasri)", "group": "Wizard", "project": "The Secret Monster" },
+      { "id": 9, "name": "Dylan", "group": "Hero", "project": "The Megalodon Hunt" },
+      { "id": 10, "name": "Tyler (Tyler Saebae)", "group": "Genius", "project": "Sharky's Snack Time" },
+      { "id": 11, "name": "Nine (Paratham Jameeken)", "group": "Wizard", "project": "Deep Blue World" },
+      { "id": 12, "name": "Nuermek (Nuermek Teeraakararat)", "group": "Genius", "project": "My Ocean Friends Party" },
+      { "id": 13, "name": "Preme2 (Premephaphan Ittipunsiri)", "group": "Wizard", "project": "Amazing Sea Creatures Quiz" },
+      { "id": 14, "name": "Gin (Sasawat Lertsamart)", "group": "Hero", "project": "Submerged" },
+      { "id": 15, "name": "Famous (Yannavut Sridawong)", "group": "Hero", "project": "บ้าน spongeBob" },
+      { "id": 16, "name": "Tonmai (Nathakorn Somsanguan)", "group": "Hero", "project": "Dedo in the ocean" },
+      { "id": 17, "name": "Matang (Tanawat Tangsupwattana)", "group": "Hero", "project": "ผู้กล้ากับดาบที่ถูกขโมยไป" },
+      { "id": 18, "name": "Pingping (Narathorn Janvipast)", "group": "Hero", "project": "spongebob" },
+      { "id": 19, "name": "Kenta (Wuttipat Tubsarn)", "group": "Hero", "project": "Ratatouille" },
+      { "id": 20, "name": "Temim (Phuchanut Saengrayub)", "group": "Hero", "project": "ศึกผู้กล้าท้าคราเคน" },
+      { "id": 21, "name": "Takky (Tatchakorn Sattawongsakul)", "group": "Hero", "project": "Super underwater" },
+      { "id": 22, "name": "Pang pang (Komthorn Janvipast)", "group": "Hero", "project": "kraken" },
+      { "id": 23, "name": "Tigger (Totchakorn Sattawongsakul)", "group": "Hero", "project": "Underwater adventure" },
+      { "id": 24, "name": "L (Allen) (Allen Jarnyaharn)", "group": "Genius", "project": "Orange in the ocean" },
+      { "id": 25, "name": "Parm & Prompt", "group": "Hero", "project": "Unshoot shark" },
+      { "id": 26, "name": "Ren (Tarit Janjaemjaroon)", "group": "Wizard", "project": "El gran maja and Bloob" },
+      { "id": 27, "name": "Miranda (Miranda Chen)", "group": "Wizard", "project": "Ginger the Clown fish" },
+      { "id": 28, "name": "Gus (Akaradej Imarom)", "group": "Wizard", "project": "Fishy fishy" },
+      { "id": 29, "name": "Eton (Chavin Rattanasophon)", "group": "Wizard", "project": "Find the fish" },
+      { "id": 30, "name": "Winwin (Thanaphat ketthanasitthi)", "group": "Hero", "project": "Poseidon" },
+      { "id": 31, "name": "Ran & Ray", "group": "Wizard", "project": "Lovely and ancient ocean" },
+      { "id": 32, "name": "Rak (Weeralak saelim)", "group": "Hero", "project": "The sea" },
+      { "id": 33, "name": "Captain (Suttidol Songsripipat)", "group": "Hero", "project": "layer of ocean" },
+      { "id": 34, "name": "Khonkwan (Benjanut Srisuk)", "group": "Hero", "project": "Gigi's adventure" },
+      { "id": 35, "name": "liangliang (Warinthon Limsathiranun)", "group": "Hero", "project": "Hungry sea monsters" },
+      { "id": 36, "name": "Thun (Thun Iamthongthong)", "group": "Wizard", "project": "The hard part of sea turtle" }
     ];
 
-    const dict = {
-      th: {
-        title: "เลือกการนำเสนอที่คุณชอบ", subtitle: "กรุณากรอกอีเมลและเลือกผู้นำเสนอ 3 ท่าน",
-        btn: "ส่งโหวต", loading: "กำลังบันทึกข้อมูล...", hint: "เลือกผู้สมัครให้ครบ 3 คน",
-        successT: "โหวตสำเร็จ!", successD: "ข้อมูลถูกบันทึกลง Google Sheet แล้ว",
-        alreadyT: "โหวตไปแล้ว", alreadyD: "อุปกรณ์นี้ได้ใช้สิทธิ์ไปแล้ว",
-        lang: "English", emailErr: "กรุณากรอกอีเมลให้ถูกต้อง"
-      },
-      en: {
-        title: "Choose your preferred presentation.", subtitle: "Please enter your email address and select 3 presenters.",
-        btn: "Submit Vote", loading: "Saving to Sheets...", hint: "Please select exactly 3",
-        successT: "Thank You!", successD: "Your vote has been recorded successfully",
-        alreadyT: "Already Voted", alreadyD: "This device/email has already been used",
-        lang: "ไทย", emailErr: "Invalid Email Address"
-      }
-    };
-
     let selected = new Set();
-    let lang = 'th';
 
-    function init() {
-      // ตรวจสอบเบื้องต้นว่าเคยโหวตหรือยัง
-      if (localStorage.getItem('voted')) {
-        showScreen('already');
-        return;
-      }
-      renderCandidates();
-      updateUI();
+    function render() {
+      ['Genius', 'Wizard', 'Hero'].forEach(group => {
+        const grid = document.getElementById(`grid-${group}`);
+        grid.innerHTML = candidates.filter(c => c.group === group).map(c => `
+          <div class="candidate-card p-6 rounded-3xl shadow-sm" id="c-${c.id}" onclick="selectCandidate(${c.id})">
+            <div class="font-bold text-slate-800 mb-1">${c.name}</div>
+            <div class="text-xs text-blue-500 font-medium uppercase tracking-tighter">${c.project}</div>
+          </div>
+        `).join('');
+      });
     }
 
-   function renderCandidates() {
-    const grid = document.getElementById('grid-candidates');
-    grid.innerHTML = candidates.map(c => {
-      // แยกบรรทัดชื่อเล่นกับชื่อจริง
-      const displayName = c.name.replace(/\) /g, ')<br>'); 
-
-      return `
-        <div class="candidate-card bg-white/10 p-4 rounded-xl text-center shadow-md flex items-center justify-center min-h-[80px]" id="c-${c.id}" onclick="selectCandidate(${c.id})">
-          <div class="font-semibold text-white leading-tight text-base">${displayName}</div>
-        </div>
-      `;
-    }).join('');
-  }
-
     function selectCandidate(id) {
+      const c = candidates.find(item => item.id === id);
+      const currentInGroup = Array.from(selected).filter(sid => candidates.find(i => i.id === sid).group === c.group);
+
       if (selected.has(id)) {
         selected.delete(id);
       } else {
-        if (selected.size >= 3) return; // ล็อคไว้ที่ 3 คน
+        if (currentInGroup.length >= 2) {
+          alert(`กลุ่ม ${c.group} โหวตได้เพียง 2 ท่านเท่านั้นครับ`);
+          return;
+        }
         selected.add(id);
       }
-      
-      // Update Class
+      updateUI();
+    }
+
+    function updateUI() {
       document.querySelectorAll('.candidate-card').forEach(el => el.classList.remove('selected'));
       selected.forEach(sid => document.getElementById(`c-${sid}`).classList.add('selected'));
-      
       validate();
     }
 
     function validate() {
       const email = document.getElementById('input-email').value;
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      const btn = document.getElementById('btn-submit');
-      const countDisplay = document.getElementById('count-display');
+      const counts = { Genius: 0, Wizard: 0, Hero: 0 };
       
-      countDisplay.innerText = selected.size;
+      selected.forEach(sid => counts[candidates.find(item => item.id === sid).group]++);
 
-      if (selected.size === 3 && isValidEmail) {
-        btn.disabled = false;
-        document.getElementById('txt-hint').innerText = "";
-      } else {
-        btn.disabled = true;
-        document.getElementById('txt-hint').innerText = selected.size < 3 ? dict[lang].hint : "";
-      }
+      let isAllComplete = true;
+      ['Genius', 'Wizard', 'Hero'].forEach(g => {
+        const badge = document.getElementById(`badge-${g}`);
+        const indicator = document.getElementById(`ind-${g}`);
+        badge.innerText = `${counts[g]} / 2`;
+        
+        if (counts[g] === 2) {
+          badge.className = "bg-green-100 text-green-600 px-4 py-1 rounded-full text-sm font-bold";
+          indicator.querySelector('.status-dot').className = "status-dot dot-done";
+          indicator.className = "text-green-600 font-bold";
+        } else {
+          badge.className = "bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold";
+          indicator.querySelector('.status-dot').className = "status-dot dot-waiting";
+          indicator.className = "text-slate-400 font-bold";
+          isAllComplete = false;
+        }
+      });
+
+      document.getElementById('btn-submit').disabled = !(isValidEmail && isAllComplete);
     }
 
     async function submitData() {
-      const email = document.getElementById('input-email').value.trim();
-      const names = Array.from(selected).map(id => candidates.find(c => c.id === id).name);
-      
-      showScreen('loading');
+      const email = document.getElementById('input-email').value;
+      const votes = Array.from(selected).map(id => {
+        const c = candidates.find(i => i.id === id);
+        return `[${c.group}] ${c.name}`;
+      });
 
-      const payload = {
-        email: email,
-        votes: names,
-        device_id: 'ID-' + Math.random().toString(36).substr(2, 9)
-      };
+      document.getElementById('screen-voting').style.display = 'none';
+      document.getElementById('screen-loading').classList.remove('hidden');
 
       try {
-        // ส่งแบบ POST โดยใช้ fetch
-        // เราใช้โหมด no-cors ไม่ได้ เพราะเราต้องการดู JSON response ที่ Apps Script ตอบกลับมา
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
+        await fetch(SCRIPT_URL, { 
+          method: "POST", 
+          mode: "no-cors",
+          body: JSON.stringify({ email, votes }) 
         });
-        
-        const resData = await response.json();
-
-        if (resData.result === "success") {
-          localStorage.setItem('voted', 'true');
-          document.getElementById('display-email').innerText = email;
-          showScreen('success');
-        } else if (resData.message === "duplicate") {
-          showScreen('already');
-        } else {
-          alert("Error: " + resData.message);
-          showScreen('voting');
-        }
-      } catch (err) {
-        // กรณี Error เรื่อง CORS (ซึ่งพบบ่อย) ให้ลองใช้วิธี Image Beacon หรือเช็ค Sheet ว่าข้อมูลเข้าไหม
-        // แต่ถ้าเซ็ต Google Script ตามข้างบนจะผ่านได้ครับ
-        console.error(err);
-        localStorage.setItem('voted', 'true'); // บันทึกไว้กันกดซ้ำ
+        localStorage.setItem('voted_showcase_2026', 'true');
         showScreen('success');
+      } catch (e) {
+        showScreen('success'); 
       }
     }
 
     function showScreen(id) {
-      document.querySelectorAll('#app > div[id^="screen-"]').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-loading').classList.add('hidden');
       document.getElementById('screen-' + id).classList.remove('hidden');
+      document.querySelector('.sticky-bar').style.display = 'none';
+      window.scrollTo(0,0);
     }
 
-    function toggleLang() {
-      lang = lang === 'th' ? 'en' : 'th';
-      document.getElementById('txt-title').innerText = dict[lang].title;
-      document.getElementById('txt-subtitle').innerText = dict[lang].subtitle;
-      document.getElementById('txt-btn-submit').innerText = dict[lang].btn;
-      document.getElementById('txt-loading').innerText = dict[lang].loading;
-      document.getElementById('lang-btn-text').innerText = dict[lang].lang;
-      validate();
-    }
-
-    init();
+    render();
   </script>
 </body>
 </html>
