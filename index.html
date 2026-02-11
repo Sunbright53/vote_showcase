@@ -191,24 +191,41 @@
       document.getElementById('btn-submit').disabled = !(isValidEmail && isAllComplete);
     }
 
-    async function submitData() {
-      const email = document.getElementById('input-email').value;
-      const votes = Array.from(selected).map(id => {
-        const c = candidates.find(i => i.id === id);
-        return `[${c.group}] ${c.name}`;
-      });
-      document.getElementById('screen-voting').classList.add('hidden');
-      document.getElementById('main-header').classList.add('hidden');
-      document.getElementById('screen-loading').classList.remove('hidden');
-      try {
-        const response = await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ email, votes }) });
-        // ในโหมด no-cors เราจะถือว่าสำเร็จเสมอ ถ้าไม่เกิด Network Error
-        localStorage.setItem('voted_showcase_2026', 'true');
-        showScreen('success');
-      } catch (e) {
-        showScreen('success'); 
-      }
+async function submitData() {
+  const email = document.getElementById('input-email').value.trim();
+  // เรียงลำดับโหวตตามกลุ่มเพื่อลง Sheet ให้ตรงคอลัมน์
+  const geniusVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Genius').map(id => candidates.find(i => i.id === id).name);
+  const wizardVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Wizard').map(id => candidates.find(i => i.id === id).name);
+  const heroVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Hero').map(id => candidates.find(i => i.id === id).name);
+  
+  const allVotes = [...geniusVotes, ...wizardVotes, ...heroVotes];
+
+  showScreen('loading');
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ email: email, votes: allVotes })
+    });
+
+    const result = await response.json();
+
+    if (result.result === "success") {
+      localStorage.setItem('voted_showcase_2026', 'true');
+      showScreen('success');
+    } else if (result.message === "duplicate") {
+      showScreen('already'); // ถ้าอีเมลซ้ำ ให้ไปหน้า "ใช้สิทธิ์ไปแล้ว"
+    } else {
+      alert("เกิดข้อผิดพลาด: " + result.message);
+      showScreen('voting');
     }
+  } catch (e) {
+    // ถ้ายังติดเรื่อง CORS ให้ใช้แผนสำรอง (บันทึกสำเร็จแต่เช็ค Response ไม่ได้)
+    console.warn("CORS limit, but data might be sent");
+    localStorage.setItem('voted_showcase_2026', 'true');
+    showScreen('success');
+  }
+}
 
     function showScreen(id) {
       document.querySelectorAll('#app > div').forEach(d => d.classList.add('hidden'));
