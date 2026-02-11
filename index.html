@@ -22,51 +22,66 @@
 <body class="pb-32">
 
   <div id="app" class="max-w-5xl mx-auto px-4 pt-10">
-    <header id="main-header" class="text-center mb-12">
-      <div class="inline-block px-4 py-1 mb-4 rounded-full bg-blue-100 text-blue-600 text-xs font-bold tracking-widest uppercase">
-        Project Showcase 15 Feb 2026
-      </div>
-      <h1 class="text-4xl font-bold text-slate-800 mb-4">เลือกผลงานที่คุณชื่นชอบ</h1>
-      <p class="text-slate-500 text-lg">กติกา: โปรดเลือกนักพัฒนาที่คุณประทับใจ **กลุ่มละ 2 ท่าน**</p>
-    </header>
+    <div id="screen-voting-container">
+        <header id="main-header" class="text-center mb-12">
+          <div class="inline-block px-4 py-1 mb-4 rounded-full bg-blue-100 text-blue-600 text-xs font-bold tracking-widest uppercase">
+            Project Showcase 15 Feb 2026
+          </div>
+          <h1 class="text-4xl font-bold text-slate-800 mb-4">เลือกผลงานที่คุณชื่นชอบ</h1>
+          <p class="text-slate-500 text-lg">กติกา: โปรดเลือกนักพัฒนาที่คุณประทับใจ **กลุ่มละ 2 ท่าน**</p>
+        </header>
 
-    <div id="screen-voting" class="space-y-8">
-      <div class="max-w-md mx-auto mb-16">
-        <div class="bg-white p-2 rounded-3xl shadow-sm border border-slate-200">
-          <input type="email" id="input-email" oninput="validate()" 
-                 class="w-full px-6 py-4 rounded-2xl focus:outline-none text-center text-lg" 
-                 placeholder="ใส่อีเมลของคุณเพื่อเริ่มโหวต">
-        </div>
-      </div>
+        <div id="screen-voting" class="space-y-8">
+          <div class="max-w-md mx-auto mb-16">
+            <div class="bg-white p-2 rounded-3xl shadow-sm border border-slate-200">
+              <input type="email" id="input-email" oninput="validate()" 
+                     class="w-full px-6 py-4 rounded-2xl focus:outline-none text-center text-lg" 
+                     placeholder="ใส่อีเมลของคุณเพื่อเริ่มโหวต">
+            </div>
+          </div>
 
-      <section class="group-section">
-        <div class="flex items-center justify-between mb-6 px-2">
-          <h2 class="text-2xl font-bold text-blue-600">กลุ่ม Genius (5-7 ปี) </h2>
-          <span id="badge-Genius" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Genius"></div>
-      </section>
+          <section class="group-section">
+            <div class="flex items-center justify-between mb-6 px-2">
+              <h2 class="text-2xl font-bold text-blue-600">กลุ่ม Genius (5-7 ปี)</h2>
+              <span id="badge-Genius" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Genius"></div>
+          </section>
 
-      <section class="group-section">
-        <div class="flex items-center justify-between mb-6 px-2">
-          <h2 class="text-2xl font-bold text-purple-600">กลุ่ม Wizard (8-10 ปี) </h2>
-          <span id="badge-Wizard" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Wizard"></div>
-      </section>
+          <section class="group-section">
+            <div class="flex items-center justify-between mb-6 px-2">
+              <h2 class="text-2xl font-bold text-purple-600">กลุ่ม Wizard (8-10 ปี)</h2>
+              <span id="badge-Wizard" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Wizard"></div>
+          </section>
 
-      <section class="group-section">
-        <div class="flex items-center justify-between mb-6 px-2">
-          <h2 class="text-2xl font-bold text-emerald-600">กลุ่ม Hero (11-14 ปี) </h2>
-          <span id="badge-Hero" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
+          <section class="group-section">
+            <div class="flex items-center justify-between mb-6 px-2">
+              <h2 class="text-2xl font-bold text-emerald-600">กลุ่ม Hero (11-14 ปี)</h2>
+              <span id="badge-Hero" class="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-sm font-bold">0 / 2</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Hero"></div>
+          </section>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-Hero"></div>
-      </section>
     </div>
 
-    <div id="screen-loading" class="hidden text-center py-24"><div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div><p>กำลังบันทึกคะแนนโหวต...</p></div>
-    <div id="screen-success" class="hidden text-center py-24"><h2 class="text-4xl font-bold text-green-600 mb-4">โหวตสำเร็จ! </h2><p class="text-slate-500 text-xl">ขอบคุณที่ร่วมเป็นแรงใจให้เด็กๆ ครับ</p></div>
-    <div id="screen-already" class="hidden text-center py-24"><h2 class="text-4xl font-bold text-amber-600 mb-4">คุณได้ใช้สิทธิ์ไปแล้ว </h2><p class="text-slate-500 text-xl">ระบบตรวจพบว่าเครื่องนี้หรืออีเมลนี้ได้ทำการโหวตแล้ว</p></div>
+    <div id="screen-loading" class="hidden text-center py-24">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-slate-600">กำลังบันทึกคะแนนโหวต...</p>
+    </div>
+    
+    <div id="screen-success" class="hidden text-center py-24">
+        <div class="text-6xl mb-6 text-green-500">✅</div>
+        <h2 class="text-4xl font-bold text-green-600 mb-4">โหวตสำเร็จ!</h2>
+        <p class="text-slate-500 text-xl">ขอบคุณที่ร่วมเป็นแรงใจให้เด็กๆ ครับ</p>
+    </div>
+    
+    <div id="screen-already" class="hidden text-center py-24">
+        <div class="text-6xl mb-6 text-amber-500">🚫</div>
+        <h2 class="text-4xl font-bold text-amber-600 mb-4">คุณได้ใช้สิทธิ์ไปแล้ว</h2>
+        <p class="text-slate-500 text-xl">ระบบตรวจพบว่าเครื่องนี้หรืออีเมลนี้ได้ทำการโหวตแล้ว</p>
+    </div>
   </div>
 
   <div class="sticky-bar shadow-2xl" id="bottom-bar">
@@ -84,12 +99,12 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLx01b0i-whvxmT6iMJsp4b8lfNz3NhtVWdhFtFaoYLkd_pFOuSXHd-RRe9M0vG8zWYA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytB9EYdDchiN5KOAeNemFtYKk---gUt9qxH7z-0lVbbedWWBv4qj6mJsIgxR56h3tPNQ/exec";
 
     const candidates = [
       { "id": 1, "name": "Neo (Touchphoom Anantakarn)", "group": "Hero", "project": "Dive: An Underwater Adventure" },
-      { "id": 2, "name": "Meg (Mira Hsu)", "group": "Hero", "project": "Project" },
-      { "id": 3, "name": "Kin (Pakin Hsu)", "group": "Wizard", "project": "Project" },
+      { "id": 2, "name": "Meg (Mira Hsu)", "group": "Hero", "project": "TinkerCad Project" },
+      { "id": 3, "name": "Kin (Pakin Hsu)", "group": "Wizard", "project": "TinkerCad Project" },
       { "id": 4, "name": "Marvin (Apipoom Hanjawanich)", "group": "Wizard", "project": "Survival Underwater in Ohio" },
       { "id": 5, "name": "Pete (PITCHAYUT KRUECHOTEKUL)", "group": "Wizard", "project": "Ocean Guardian" },
       { "id": 6, "name": "JulJul (Saranyapong Kanchanapangka)", "group": "Wizard", "project": "Exploring the deep ocean" },
@@ -140,8 +155,8 @@
         const grid = document.getElementById(`grid-${group}`);
         grid.innerHTML = candidates.filter(c => c.group === group).map(c => `
           <div class="candidate-card p-6 rounded-3xl shadow-sm" id="c-${c.id}" onclick="selectCandidate(${c.id})">
-            <div class="font-bold text-slate-800 mb-1">${c.name}</div>
-            <div class="text-xs text-blue-500 font-medium uppercase tracking-tighter">${c.project}</div>
+            <div class="font-bold text-slate-800 mb-1 text-base leading-tight">${c.name}</div>
+            <div class="text-[10px] text-blue-500 font-medium uppercase tracking-tighter">${c.project}</div>
           </div>
         `).join('');
       });
@@ -150,8 +165,9 @@
     function selectCandidate(id) {
       const c = candidates.find(item => item.id === id);
       const currentInGroup = Array.from(selected).filter(sid => candidates.find(i => i.id === sid).group === c.group);
-      if (selected.has(id)) { selected.delete(id); } 
-      else {
+      if (selected.has(id)) { 
+          selected.delete(id); 
+      } else {
         if (currentInGroup.length >= 2) {
           alert(`กลุ่ม ${c.group} โหวตได้เพียง 2 ท่านเท่านั้นครับ`);
           return;
@@ -171,7 +187,11 @@
       const email = document.getElementById('input-email').value;
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       const counts = { Genius: 0, Wizard: 0, Hero: 0 };
-      selected.forEach(sid => counts[candidates.find(item => item.id === sid).group]++);
+      selected.forEach(sid => {
+          const item = candidates.find(i => i.id === sid);
+          if (item) counts[item.group]++;
+      });
+
       let isAllComplete = true;
       ['Genius', 'Wizard', 'Hero'].forEach(g => {
         const badge = document.getElementById(`badge-${g}`);
@@ -191,46 +211,62 @@
       document.getElementById('btn-submit').disabled = !(isValidEmail && isAllComplete);
     }
 
-async function submitData() {
-  const email = document.getElementById('input-email').value.trim();
-  // เรียงลำดับโหวตตามกลุ่มเพื่อลง Sheet ให้ตรงคอลัมน์
-  const geniusVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Genius').map(id => candidates.find(i => i.id === id).name);
-  const wizardVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Wizard').map(id => candidates.find(i => i.id === id).name);
-  const heroVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Hero').map(id => candidates.find(i => i.id === id).name);
-  
-  const allVotes = [...geniusVotes, ...wizardVotes, ...heroVotes];
+   async function submitData() {
+      const email = document.getElementById('input-email').value.trim();
+      
+      // เรียงลำดับโหวตตามกลุ่ม: Genius(2), Wizard(2), Hero(2) เพื่อลง Sheet ให้ตรงคอลัมน์
+      const geniusVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Genius').map(id => candidates.find(i => i.id === id).name);
+      const wizardVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Wizard').map(id => candidates.find(i => i.id === id).name);
+      const heroVotes = Array.from(selected).filter(id => candidates.find(i => i.id === id).group === 'Hero').map(id => candidates.find(i => i.id === id).name);
+      
+      const allVotes = [...geniusVotes, ...wizardVotes, ...heroVotes];
 
-  showScreen('loading');
+      showScreen('loading');
 
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ email: email, votes: allVotes })
-    });
+      try {
+        // ส่งข้อมูลแบบปกติ (ต้องใช้ URL ที่ Deploy ล่าสุด)
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ email: email, votes: allVotes })
+        });
 
-    const result = await response.json();
+        const result = await response.json();
 
-    if (result.result === "success") {
-      localStorage.setItem('voted_showcase_2026', 'true');
-      showScreen('success');
-    } else if (result.message === "duplicate") {
-      showScreen('already'); // ถ้าอีเมลซ้ำ ให้ไปหน้า "ใช้สิทธิ์ไปแล้ว"
-    } else {
-      alert("เกิดข้อผิดพลาด: " + result.message);
-      showScreen('voting');
+        if (result.result === "success") {
+          localStorage.setItem('voted_showcase_2026', 'true');
+          showScreen('success');
+        } else if (result.message === "duplicate") {
+          showScreen('already'); // ถ้าอีเมลซ้ำให้ไปหน้าแจ้งเตือน
+        } else {
+          alert("เกิดข้อผิดพลาดจากระบบ: " + result.message);
+          showScreen('voting');
+        }
+        
+      } catch (e) {
+        console.error("Submission Error:", e);
+        // กรณีเกิด Error ในขั้นตอนนี้ ส่วนใหญ่ข้อมูลจะถูกส่งไปแล้ว 
+        // แต่ Browser โดนบล็อกการตอบกลับ แนะนำให้เช็คใน Sheet
+        localStorage.setItem('voted_showcase_2026', 'true');
+        showScreen('success');
+      }
     }
-  } catch (e) {
-    // ถ้ายังติดเรื่อง CORS ให้ใช้แผนสำรอง (บันทึกสำเร็จแต่เช็ค Response ไม่ได้)
-    console.warn("CORS limit, but data might be sent");
-    localStorage.setItem('voted_showcase_2026', 'true');
-    showScreen('success');
-  }
-}
 
     function showScreen(id) {
-      document.querySelectorAll('#app > div').forEach(d => d.classList.add('hidden'));
-      document.getElementById('screen-' + id).classList.remove('hidden');
-      document.getElementById('bottom-bar').style.display = 'none';
+      // ซ่อนคอนเทนเนอร์หลักทั้งหมด
+      document.getElementById('screen-voting-container').classList.add('hidden');
+      document.getElementById('screen-loading').classList.add('hidden');
+      document.getElementById('screen-success').classList.add('hidden');
+      document.getElementById('screen-already').classList.add('hidden');
+      
+      // แสดงหน้าจอที่ระบุ
+      const target = document.getElementById('screen-' + id);
+      if (target) target.classList.remove('hidden');
+      
+      // ซ่อนแถบด้านล่างหากไม่ใช่หน้าโหวต
+      if (id !== 'voting') {
+        document.getElementById('bottom-bar').classList.add('hidden');
+      }
+      
       window.scrollTo(0,0);
     }
 
